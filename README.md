@@ -12,7 +12,7 @@ Windows e Linux · nunca derruba o app.
 
 ```yaml
 dependencies:
-  bfocus_monitor: ^0.1.1
+  bfocus_monitor: ^0.1.2
 ```
 
 ou `flutter pub add bfocus_monitor`.
