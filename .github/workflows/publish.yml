@@ -1,0 +1,81 @@
+# Publica bfocus_monitor no pub.dev ao receber a tag vX.Y.Z no espelho público
+# bernisoftware/bfocus-monitor-flutter (o scripts/release-monitor.sh do monorepo espelha monitor/flutter
+# e cria a tag).
+#
+# Ordem: testes na menor (environment.flutter do pubspec: 3.10.0) e na maior versão do Flutter — o pacote
+# com `flutter test` e o núcleo Dart puro com `dart test` em test_core/ (fora do pacote publicado pelo
+# .pubignore) — → tag == version do pubspec == sdkVersion (lib/src/core/version.dart) → publica com OIDC,
+# sem token guardado. O teste que compara com o monorepo (monitor/release.json) pula sozinho aqui.
+#
+# Pré-requisito no pub.dev (Admin do pacote → Automated publishing): repositório
+# bernisoftware/bfocus-monitor-flutter, tag pattern `v{{version}}` e environment `pub.dev`.
+name: Publicar no pub.dev
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Testes (Flutter ${{ matrix.flutter }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        # 3.10.0 = piso do pubspec (environment.flutter, Dart 3.0); "stable" = a mais nova.
+        flutter: ['3.10.0', 'stable']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ matrix.flutter != 'stable' && matrix.flutter || '' }}
+          cache: true
+      - run: flutter --version
+      - run: flutter pub get
+      # Só no stable: o analisador do piso não conhece regras de lint mais novas do flutter_lints e
+      # acusaria "regra desconhecida" — barulho do lint, não do pacote. Compilar e testar no piso,
+      # sim (flutter test, abaixo).
+      - if: matrix.flutter == 'stable'
+        run: flutter analyze --no-fatal-infos
+      - run: flutter test
+      # Núcleo Dart puro (conformidade + parse de stack + versão == pubspec == README) com o `dart`
+      # que vem com este Flutter.
+      - name: dart test (test_core)
+        working-directory: test_core
+        run: |
+          dart pub get
+          dart test
+
+  publish:
+    name: Publicar
+    needs: test
+    runs-on: ubuntu-latest
+    environment: pub.dev
+    permissions:
+      contents: read
+      id-token: write # OIDC do pub.dev
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag igual à versão do pubspec e a sdkVersion
+        run: |
+          VERSION=$(grep -E '^version:' pubspec.yaml | awk '{print $2}')
+          CODE=$(sed -nE "s/^const String sdkVersion = '([^']+)';.*/\1/p" lib/src/core/version.dart)
+          TAG="${GITHUB_REF_NAME#v}"
+          echo "tag=$TAG pubspec=$VERSION sdkVersion=$CODE"
+          if [ "$TAG" != "$VERSION" ] || [ "$TAG" != "$CODE" ]; then
+            echo "::error::A tag ($GITHUB_REF_NAME) não bate com version: $VERSION do pubspec.yaml / sdkVersion '$CODE'"
+            exit 1
+          fi
+      # setup-dart configura o token OIDC do pub.dev; o Flutter vem depois para o `dart` do PATH ser
+      # o do Flutter (o pacote depende do SDK do Flutter).
+      - uses: dart-lang/setup-dart@v1
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: dart pub publish --dry-run
+      - run: dart pub publish --force

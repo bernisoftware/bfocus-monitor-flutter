@@ -1,0 +1,30 @@
+name: bfocus_monitor
+description: >-
+  Monitoramento de erros do bFocus para apps Flutter: captura os erros não
+  tratados (FlutterError, PlatformDispatcher e zona) e manda para o bFocus.
+version: 0.1.0
+homepage: https://bfocus.com.br
+repository: https://github.com/bernisoftware/bfocus-monitor-flutter
+issue_tracker: https://github.com/bernisoftware/bfocus-monitor-flutter/issues
+topics:
+  - monitoring
+  - error-reporting
+  - crash-reporting
+  - logging
+
+# Dart 3.0 = Flutter 3.10 (records, class modifiers). PlatformDispatcher.onError: Flutter 3.3+.
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+# Zero dependência além do Flutter SDK: envio com dart:io HttpClient.
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^3.0.0
+  flutter_test:
+    sdk: flutter
+
+# Sem `flutter:` (nem assets nem plugin nativo): pacote só de Dart.

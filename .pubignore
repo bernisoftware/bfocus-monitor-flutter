@@ -1,0 +1,4 @@
+# O núcleo testado com `dart test` (sem Flutter) fica fora do pacote publicado.
+test_core/
+.dart_tool/
+build/

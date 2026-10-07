@@ -1,0 +1,10 @@
+# Roda o núcleo Dart puro (lib/src/core) com `dart test`, sem o Flutter SDK.
+#   cd monitor/flutter/test_core && dart pub get && dart test
+name: bfocus_monitor_core_test
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dev_dependencies:
+  test: ^1.24.0

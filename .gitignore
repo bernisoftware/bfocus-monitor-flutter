@@ -1,0 +1,5 @@
+.dart_tool/
+pubspec.lock
+build/
+test_core/.dart_tool/
+test_core/pubspec.lock
