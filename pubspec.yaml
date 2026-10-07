@@ -2,7 +2,7 @@ name: bfocus_monitor
 description: >-
   Monitoramento de erros do bFocus para apps Flutter: captura os erros não
   tratados (FlutterError, PlatformDispatcher e zona) e manda para o bFocus.
-version: 0.1.0
+version: 0.1.1
 homepage: https://bfocus.com.br
 repository: https://github.com/bernisoftware/bfocus-monitor-flutter
 issue_tracker: https://github.com/bernisoftware/bfocus-monitor-flutter/issues

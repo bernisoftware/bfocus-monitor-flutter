@@ -77,5 +77,8 @@ jobs:
         with:
           channel: stable
       - run: flutter pub get
+      # O que o `pub get` mexer em arquivo versionado volta ao que a tag tem (o pub.dev recusa
+      # publicar de árvore suja).
+      - run: git status --porcelain && git checkout -- .
       - run: dart pub publish --dry-run
       - run: dart pub publish --force
